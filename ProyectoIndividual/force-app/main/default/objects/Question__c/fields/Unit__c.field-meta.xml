@@ -4,8 +4,8 @@
     <externalId>false</externalId>
     <label>Unit</label>
     <referenceTo>Unit__c</referenceTo>
-    <relationshipLabel>Quetions</relationshipLabel>
-    <relationshipName>Quetions</relationshipName>
+    <relationshipLabel>Questions</relationshipLabel>
+    <relationshipName>Questions</relationshipName>
     <relationshipOrder>0</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackTrending>false</trackTrending>

@@ -32,5 +32,8 @@ public with sharing class UnitService {
            questionResponseList.add(questionResponse);
        }
          insert questionResponseList;
+
+         unitResp.Status__c = 'Answered';
+         update unitResp;
     }
 }

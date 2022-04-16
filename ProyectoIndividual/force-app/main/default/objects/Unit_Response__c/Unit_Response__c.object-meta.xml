@@ -157,7 +157,7 @@
     <label>Unit_Response</label>
     <nameField>
         <displayFormat>UR - {0000}</displayFormat>
-        <label>UnitResponse</label>
+        <label>Unit_Response</label>
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Unit_Responses</pluralLabel>

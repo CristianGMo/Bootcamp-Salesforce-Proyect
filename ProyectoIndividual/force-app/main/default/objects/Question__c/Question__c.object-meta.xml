@@ -149,17 +149,18 @@
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
     <enableReports>false</enableReports>
-    <enableSearch>false</enableSearch>
+    <enableSearch>true</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>ControlledByParent</externalSharingModel>
     <gender>Feminine</gender>
     <label>Question</label>
     <nameField>
-        <label>Question Name</label>
-        <type>Text</type>
+        <displayFormat>Q-{00000}</displayFormat>
+        <label>Question</label>
+        <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Quetions</pluralLabel>
+    <pluralLabel>Questions</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>

@@ -157,7 +157,7 @@
     <label>Answer</label>
     <nameField>
         <displayFormat>A - {00000}</displayFormat>
-        <label>Answer Name</label>
+        <label>Answer</label>
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Answers</pluralLabel>

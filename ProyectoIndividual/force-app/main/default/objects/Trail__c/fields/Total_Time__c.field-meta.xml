@@ -4,7 +4,7 @@
     <externalId>false</externalId>
     <label>Total Time</label>
     <summarizedField>Trail_Module__c.Total_Time__c</summarizedField>
-    <summaryForeignKey>Trail_Module__c.Trail_Name__c</summaryForeignKey>
+    <summaryForeignKey>Trail_Module__c.Trail__c</summaryForeignKey>
     <summaryOperation>sum</summaryOperation>
     <trackTrending>false</trackTrending>
     <type>Summary</type>
