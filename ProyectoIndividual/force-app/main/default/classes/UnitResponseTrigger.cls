@@ -6,7 +6,7 @@ public with sharing class UnitResponseTrigger {
         List <Unit_Response__c> ansUnitRespList = new List <Unit_Response__c> ();
 
         for(Unit_Response__c unitResponse : unitResponseList){
-            if(unitResponse.Status__c== 'Answered' && oldUnitResponseMap.getValue(unitResponse.id).Status__c== 'Draft'){
+            if(unitResponse.Status__c== 'Answered' && oldUnitResponseMap.getValue(unitResponse.Id).Status__c== 'Draft'){
                 ansUnitRespList.add(unitResponse);
             }
         }

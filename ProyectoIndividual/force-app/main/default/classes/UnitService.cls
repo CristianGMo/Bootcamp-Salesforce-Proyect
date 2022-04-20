@@ -4,7 +4,7 @@ public with sharing class UnitService {
 
         Boolean res = true;
         //Guardo un estado de la db
-        Database.SavePoint savepoint = Database.setSavePoint();
+        Savepoint savepoint = Database.setSavepoint();
         
         //Utilizo try-chatch para capturar cualquier excepción
         try{
@@ -17,25 +17,25 @@ public with sharing class UnitService {
         //Si el ModuleResponse no existe le asigno el nuevo module response
         if(!moduleResp){
             //Creo el ModuleResponse con los datos obtenidos desde la Unit y el User que obtengo mediante la API, luego lo inserto
-            moduleResp= new ModuleResponse__c(User__c = Userinfo.getUserId(), Module__c = unit.Module__c, Status__c = 'In Progress');
+            moduleResp= new Module_Response__c(User__c = Userinfo.getUserId(), Module__c = unit.Module__c, Status__c = 'In Progress');
             insert moduleResp;
 
         }
     
         //Creo El UnitResponse y lo inserto los datos a la Db
-        UnitResponse__c unitResp = new UnitResponse (Module_Response__c = moduleResp.Id, Unit__c = unitId, Status__c = 'Draft');
+        Unit_Response__c unitResp = new Unit_Response__c (Module_Response__c = moduleResp.Id, Unit__c = unitId, Status__c = 'Draft');
 
-        unitResp.Tries__c = !unitResp.Tries__c.isEmpty() ? unit.Unit_Response__c[0].Tries__c + 1 : 1;
+        unitResp.Tries__c = !unitResp.Tries__c.isEmpty() ? unit.Unit_Responses__c[0].Tries__c + 1 : 1;
         insert unitResp;
 
         //Uso API para transformar un json en un Map (IdQuestion : IdAnswer).En el json vienen las respuestas elegidas en cada pregunta de la unidad.
         Map<Id,Id> AnswerMap = (Map<Id,Id>)JSON.deserializeStrict(jsonAnswer, Map<Id,Id>.class);
 
         //Creo una lista de QuestionResponse donde guardaremos el Id de las question que pertenezcan a la unidad en la que nos encontramos.
-        List<QuestionResponse__c> questionResponseList = new List<QuestionResponse__c>();
+        List<Question_Response__c> questionResponseList = new List<Question_Response__c>();
 
         for (Question__c question : unit.Questions__r){
-           QuestionResponse__c questionResponse = new QuestionResponse__c (Question__c = question.id, UnitResponse = unitId, Answer__c = AnswerMap.get(question.id));
+           Question_Response__c questionResponse = new Question_Response__c (Question__c = question.id, Unit_Response__c = unitId, Answer__c = AnswerMap.get(question.id));
            questionResponseList.add(questionResponse);
        }
          insert questionResponseList;
