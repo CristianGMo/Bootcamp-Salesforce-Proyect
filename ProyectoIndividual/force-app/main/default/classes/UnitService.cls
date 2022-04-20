@@ -2,7 +2,13 @@ public with sharing class UnitService {
 
     public static Boolean registerUnitResponse(Id unitId, String jsonAnswer) {
 
-        //Busco en mi db la unidad basandome en el Id que viene como parametro(obtengo el modulo al que pertenece y las preguntas que tiene relacionadas)
+        Boolean res = true;
+        //Guardo un estado de la db
+        Database.SavePoint savepoint = Database.setSavePoint();
+        
+        //Utilizo try-chatch para capturar cualquier excepción
+        try{
+            //Busco en mi db la unidad basandome en el Id que viene como parametro(obtengo el modulo al que pertenece y las preguntas que tiene relacionadas)
         Unit__c unit = [SELECT Module__c, id, (SELECT id, Name from Questions__r) FROM Unit__c WHERE id=:unitId];
 
         //Verifico si existe un module response 
@@ -18,6 +24,8 @@ public with sharing class UnitService {
     
         //Creo El UnitResponse y lo inserto los datos a la Db
         UnitResponse__c unitResp = new UnitResponse (Module_Response__c = moduleResp.Id, Unit__c = unitId, Status__c = 'Draft');
+
+        unitResp.Tries__c = !unitResp.Tries__c.isEmpty() ? unit.Unit_Response__c[0].Tries__c + 1 : 1;
         insert unitResp;
 
         //Uso API para transformar un json en un Map (IdQuestion : IdAnswer).En el json vienen las respuestas elegidas en cada pregunta de la unidad.
@@ -26,7 +34,6 @@ public with sharing class UnitService {
         //Creo una lista de QuestionResponse donde guardaremos el Id de las question que pertenezcan a la unidad en la que nos encontramos.
         List<QuestionResponse__c> questionResponseList = new List<QuestionResponse__c>();
 
-        //En vez de verificar si las preguntas de la unidad vienen todas en el json puedo poner una restriccion? Por ejemplo que no se habilite el boton de enviar hasta que todas las respuestas esten respondidas como en trailhead.(PREGUNTAR)
         for (Question__c question : unit.Questions__r){
            QuestionResponse__c questionResponse = new QuestionResponse__c (Question__c = question.id, UnitResponse = unitId, Answer__c = AnswerMap.get(question.id));
            questionResponseList.add(questionResponse);
@@ -35,5 +42,14 @@ public with sharing class UnitService {
 
          unitResp.Status__c = 'Answered';
          update unitResp;
+        }
+        catch(Exception e){
+            Database.rollback(savepoint);
+            res = false;
+            throw e;
+            
+        }
+        return res;
+        
     }
 }
