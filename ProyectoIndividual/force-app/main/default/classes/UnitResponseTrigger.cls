@@ -6,7 +6,7 @@ public with sharing class UnitResponseTrigger {
         List <Unit_Response__c> ansUnitRespList = new List <Unit_Response__c> ();
 
         for(Unit_Response__c unitResponse : unitResponseList){
-            if(unitResponse.Status__c== 'Answered' && oldUnitResponseMap.getValue(unitResponse.Id).Status__c== 'Draft'){
+            if(unitResponse.Status__c== 'Answered' && oldUnitResponseMap.get(unitResponse.Id).Status__c== 'Draft'){
                 ansUnitRespList.add(unitResponse);
             }
         }
@@ -17,7 +17,7 @@ public with sharing class UnitResponseTrigger {
         List <Unit_Response__c> correctUnitResponseList = new List <Unit_Response__c>();
 
         for(Unit_Response__c UnitResponse : unitResponseList){
-            if(UnitResponse.IsComplete__c && !oldUnitResponseMap.get(UnitResponse.id).IsComplete__c){
+            if(UnitResponse.Is_Complete__c && !oldUnitResponseMap.get(UnitResponse.id).Is_Complete__c){
                correctUnitResponseList.add(UnitResponse);
             }    
         }
@@ -33,16 +33,17 @@ public with sharing class UnitResponseTrigger {
 
         for (Unit_Response__c unitResponse : unitResponseList){
             
-            UnitResponse.Answers__r.Is_Correct__c = true;
+            unitResponse.Is_Complete__c = true;
 
             for(Question_Response__c questionResp : dbUnitRespMap.get(unitResponse.id).Question_Responses__r){
-                if(!questionResp.Answers__r.Is_Correct__c){
-                    unitResponse.Status__c = false;
+                if(questionResp.Answers__r.Is_Correct__c!=true){
+                    unitResponse.Is_Complete__c = false;
                     break;
                 }
+                unitResponse.Status__c = 'Success';
             }
 
-            if(unitResponse.Status__c){
+            if(unitResponse.Status__c=='Success'){
                 if(unitResponse.Tries__c == 1){
                     unitResponses.Points__c = unitResponse.Unit__r.Points__c;
                 }
