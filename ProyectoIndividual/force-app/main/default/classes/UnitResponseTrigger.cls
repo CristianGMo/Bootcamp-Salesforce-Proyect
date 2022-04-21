@@ -35,8 +35,9 @@ public with sharing class UnitResponseTrigger {
             
             unitResponse.Is_Complete__c = true;
 
-            for(Question_Response__c questionResp : dbUnitRespMap.get(unitResponse.id).Question_Responses__r){
-                if(questionResp.Answers__r.Is_Correct__c!=true){
+            for(Question_Response__c questionResp : dbUnitRespMap.get(unitResponse.Id).Question_Responses__r){
+
+                if(questionResp.Answer__r.Is_Correct__c!=true){
                     unitResponse.Is_Complete__c = false;
                     break;
                 }
@@ -45,7 +46,7 @@ public with sharing class UnitResponseTrigger {
 
             if(unitResponse.Status__c=='Success'){
                 if(unitResponse.Tries__c == 1){
-                    unitResponses.Points__c = unitResponse.Unit__r.Points__c;
+                    unitResponse.Points__c = unitResponse.Unit__r.Points__c;
                 }
                 else if(unitResponse.Tries__c ==2 ){
                     unitResponse.Points__c = unitResponse.Unit__r.Points__c/2;
@@ -71,7 +72,7 @@ public with sharing class UnitResponseTrigger {
 
         //Actualizar los puntos en db
         for (Unit_Response__c UnitResponse : unitResponseList){
-            User user = userMap.get(UnitResponse.User__c);
+            User user = usersMap.get(UnitResponse.User__c);
             user.Points__c += UnitResponse.Points__c;
         }
 

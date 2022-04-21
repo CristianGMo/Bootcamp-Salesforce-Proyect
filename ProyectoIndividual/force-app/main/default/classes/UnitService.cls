@@ -52,4 +52,60 @@ public with sharing class UnitService {
         return res;
         
     }
+
+    public static TrailWrapper getTrailWrapper(Id trailId){
+		
+        //Instancio trail wrapper con trail y modulos
+        TrailWrapper trailWrap = new TrailWrapper([SELECT Name, Description__c FROM Trail__c WHERE Id =: trailId], getModules(trailId), getModuleIdsCompleted(trailId), getUnitIdsCompleted(trailId));
+
+        return trailWrap;
+    }
+
+    private List<Module__c> getModules(Id trailId){
+        //Busco modulos relacionados
+        List<Trail_Module__c> trailModules = [SELECT Module__c FROM Trail_Module__c WHERE Trail__c =: trailId];
+        Set<Id> moduleIds = new Set<Id>();
+        for(Trail_Module__c trailModule : trailModules){
+            moduleIds.add(trailModule.Module__c);
+        }
+        return [SELECT Name, (SELECT Name, Description__c FROM Units__r) FROM Module__c WHERE Id in : moduleIds];
+    }
+
+    private Set<Id> getModuleIdsCompleted(Id trailId){
+        List<Module_Response__c> moduleResponses = [SELECT Module__c FROM Module_Response__c WHERE Status__c = 'Complete' AND Module__r.Trail__c =: trailId AND User__c =: Userinfo.getUserId()];
+        Set<Id> completedModuleIds = new Set<Id>();
+        for(Module_Response__c moduleResp : moduleResponses){
+            completedModuleIds.add(moduleResp.Module__c);
+        }
+
+        return completedModuleIds;
+    }
+    private Set<Id> getUnitIdsCompleted(Id trailId){
+        List<Unit_Response__c> unitResponses = [SELECT Unit__c FROM Unit_Response__c WHERE Is_Complete__c = true AND User__c =: Userinfo.getUserId() AND Module_Response__r.Module__r.Trail__c =: trailId];
+        Set<Id> completedUnitIds = new Set<Id>();
+        for(Unit_Response__c unitResp : unitResponses){
+            completedUnitIds.add(unitResp.Unit__c);
+        }
+
+        return completedUnitIds;
+    }
+
+    public class TrailWrapper{
+        //Configuracion
+        public Trail__c trail; //Registro de Trail solicitado
+        public List<Module__c> modules; //Módulos con Unidades relacionadas
+        
+        //Transaccional
+        public Set<Id> passedModuleIds; //Ids de módulos relacionados al Trail actual en los que el Alumno ya aprobó
+        public Set<Id> passedUnitIds; //Ids de Unidades relacionadas a módulos del Trail actual que el Alumno ya aprobó
+        public Integer progressTrail; //Porcentaje de progreso del Alumno en el Trail
+
+        public TrailWrapper(Trail__c trail, List<Module__c> modules, Set<Id> passedModuleIds, Set<Id> passedUnitIds){
+            this.trail = trail;
+            this.modules = modules;
+            this.passedModuleIds = passedModuleIds;
+            this.passedUnitIds = passedUnitIds;
+            this.progressTrail = passedModuleIds.size() / modules.size();
+        }
+    }
 }
