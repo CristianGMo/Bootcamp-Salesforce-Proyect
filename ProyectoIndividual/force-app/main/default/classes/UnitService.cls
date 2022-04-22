@@ -56,23 +56,30 @@ public with sharing class UnitService {
     public static TrailWrapper getTrailWrapper(Id trailId){
 		
         //Instancio trail wrapper con trail y modulos
-        TrailWrapper trailWrap = new TrailWrapper([SELECT Name, Description__c FROM Trail__c WHERE Id =: trailId], getModules(trailId), getModuleIdsCompleted(trailId), getUnitIdsCompleted(trailId));
+        TrailWrapper trailWrap = new TrailWrapper([SELECT Name, Description__c, Total_Points__c, Total_Time__c FROM Trail__c WHERE Id =: trailId], getModules(trailId), getModuleIdsCompleted(trailId, getModules(trailId)), getUnitIdsCompleted(trailId, getModuleIdsCompleted(trailId, getModules(trailId))));
 
         return trailWrap;
     }
 
-    private List<Module__c> getModules(Id trailId){
-        //Busco modulos relacionados
+    private static List<Module__c> getModules(Id trailId){
+
+        //Busco modulos relacionados al trailId recibido como parametro
         List<Trail_Module__c> trailModules = [SELECT Module__c FROM Trail_Module__c WHERE Trail__c =: trailId];
+        //Guardo y retorno los ids de los modulos relacionados al trailId
         Set<Id> moduleIds = new Set<Id>();
         for(Trail_Module__c trailModule : trailModules){
             moduleIds.add(trailModule.Module__c);
         }
-        return [SELECT Name, (SELECT Name, Description__c FROM Units__r) FROM Module__c WHERE Id in : moduleIds];
+
+        return [SELECT Name, Description__c, Module_Points__c, Module_Time__c, (SELECT Name, Content__c FROM Units__r) FROM Module__c WHERE Id in : moduleIds];
     }
 
-    private Set<Id> getModuleIdsCompleted(Id trailId){
-        List<Module_Response__c> moduleResponses = [SELECT Module__c FROM Module_Response__c WHERE Status__c = 'Complete' AND Module__r.Trail__c =: trailId AND User__c =: Userinfo.getUserId()];
+    private static Set<Id> getModuleIdsCompleted(Id trailId, List <Module__c> modules){
+
+        //Buscar los modulos completados relacionados al trailId
+        List<Module_Response__c> moduleResponses = [SELECT Module__c FROM Module_Response__c WHERE Status__c = 'Complete' AND Module__c in : modules AND User__c =: Userinfo.getUserId()];
+
+        //Guardo y retorno los ids de los modulos completados
         Set<Id> completedModuleIds = new Set<Id>();
         for(Module_Response__c moduleResp : moduleResponses){
             completedModuleIds.add(moduleResp.Module__c);
@@ -80,8 +87,12 @@ public with sharing class UnitService {
 
         return completedModuleIds;
     }
-    private Set<Id> getUnitIdsCompleted(Id trailId){
-        List<Unit_Response__c> unitResponses = [SELECT Unit__c FROM Unit_Response__c WHERE Is_Complete__c = true AND User__c =: Userinfo.getUserId() AND Module_Response__r.Module__r.Trail__c =: trailId];
+    private static Set<Id> getUnitIdsCompleted(Id trailId,  Set<id> modules){
+
+        //Armo una lista de las unidades relacionadas a los modulos completados y al trailId pasado por parametro
+        List<Unit_Response__c> unitResponses = [SELECT Unit__c FROM Unit_Response__c WHERE Is_Complete__c = true AND User__c =: Userinfo.getUserId() AND Module_Response__c in : modules];
+        
+        //Guardo el id de las unitsCompleted
         Set<Id> completedUnitIds = new Set<Id>();
         for(Unit_Response__c unitResp : unitResponses){
             completedUnitIds.add(unitResp.Unit__c);
@@ -106,6 +117,23 @@ public with sharing class UnitService {
             this.passedModuleIds = passedModuleIds;
             this.passedUnitIds = passedUnitIds;
             this.progressTrail = passedModuleIds.size() / modules.size();
+        }
+    }
+
+    public static UnitWrapper getUnitWrapper(Id unitId){
+
+        UnitWrapper unitWrap = new UnitWrapper([SELECT Name, Description__c, Contain__c,(SELECT id, Content__c FROM Questions__r )FROM Unit__c WHERE Id =: unitId], getQuestions(unitId));
+        return trailWrap;
+    }
+    
+    public class UnitWrapper {
+        
+        public Unit__c unit; //Unidad solicitada
+        public List <Question__c> questions; // Lista de preguntas de la unidad
+
+        public UnitWrapper (Unit__c unit, List<Question__c> questions){
+            this.unit = unit;
+            this.questions = questions;
         }
     }
 }
