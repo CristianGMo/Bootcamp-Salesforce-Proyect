@@ -54,9 +54,14 @@ public with sharing class UnitService {
     }
 
     public static TrailWrapper getTrailWrapper(Id trailId){
-		
+		//Modulos que estan en el Trail
+        List<Module__c> modules = (getModules(trailId));
+        //Modulos completados del trail
+        Set<Id> completedModules = (getModuleIdsCompleted(trailId, modules));
+        //Unidades completadas de los modulos
+        Set<Id> completedUnits = (getUnitIdsCompleted(trailId, completedModules));
         //Instancio trail wrapper con trail y modulos
-        TrailWrapper trailWrap = new TrailWrapper([SELECT Name, Description__c, Total_Points__c, Total_Time__c FROM Trail__c WHERE Id =: trailId], getModules(trailId), getModuleIdsCompleted(trailId, getModules(trailId)), getUnitIdsCompleted(trailId, getModuleIdsCompleted(trailId, getModules(trailId))));
+        TrailWrapper trailWrap = new TrailWrapper([SELECT Name, Description__c, Total_Points__c, Total_Time__c FROM Trail__c WHERE Id =: trailId], modules, completedModules, completedUnits);
 
         return trailWrap;
     }
@@ -122,8 +127,10 @@ public with sharing class UnitService {
 
     public static UnitWrapper getUnitWrapper(Id unitId){
 
-        UnitWrapper unitWrap = new UnitWrapper([SELECT Name, Description__c, Contain__c,(SELECT id, Content__c FROM Questions__r )FROM Unit__c WHERE Id =: unitId], getQuestions(unitId));
-        return trailWrap;
+        Unit__c unit = [SELECT Name, Content__c, (SELECT id, Content__c FROM Questions__r) FROM Unit__c WHERE Id =: unitId];
+        List<Question__c> questions = unit.Questions__r;
+        UnitWrapper unitWrap = new UnitWrapper(unit, questions);
+        return unitWrap;
     }
     
     public class UnitWrapper {
