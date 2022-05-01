@@ -23,6 +23,7 @@ public with sharing class UnitResponseTrigger {
         }
 
         updateUserPoints(correctUnitResponseList);
+        
     }
 
     //Method que verifica si las respuestas selecionadas son las correctas, si lo son, entonces el status de Unit Response pasara a ser complete = true
@@ -37,7 +38,7 @@ public with sharing class UnitResponseTrigger {
 
             for(Question_Response__c questionResp : dbUnitRespMap.get(unitResponse.Id).Question_Responses__r){
 
-                if(questionResp.Answer__r.Is_Correct__c!=true){
+                if(questionResp.Answer__r.Is_Correct__c=false){
                     unitResponse.Is_Complete__c = false;
                     break;
                 }
@@ -46,13 +47,13 @@ public with sharing class UnitResponseTrigger {
 
             if(unitResponse.Status__c=='Success'){
                 if(unitResponse.Tries__c == 1){
-                    unitResponse.Points__c = unitResponse.Unit__r.Points__c;
+                    unitResponse.Points__c = (Integer)unitResponse.Unit__r.Points__c;
                 }
                 else if(unitResponse.Tries__c ==2 ){
-                    unitResponse.Points__c = unitResponse.Unit__r.Points__c/2;
+                    unitResponse.Points__c = ((Integer)unitResponse.Unit__r.Points__c)/2;
                 }
                 else{
-                    unitResponse.Points__c = unitResponse.Unit__r.Points__c/4;
+                    unitResponse.Points__c = ((Integer)unitResponse.Unit__r.Points__c)/4;
                 }
             }
         }
